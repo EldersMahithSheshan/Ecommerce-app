@@ -15,7 +15,11 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), $this->rules());
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($request->wantsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
         }
 
         try {
@@ -28,17 +32,24 @@ class CustomerController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            // Generate token using Laravel Sanctum
             $token = $customer->createToken('customerToken')->plainTextToken;
 
-            return response()->json([
-                'message' => 'Customer registered successfully',
-                'customer' => $customer,
-                'token' => $token,
-            ], 200);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Customer registered successfully',
+                    'customer' => $customer,
+                    'token' => $token,
+                ], 200);
+            } else {
+                return view('Customers.success', ['customer' => $customer]); // Correct view path
+            }
 
         } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred while registering the customer.'], 500);
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'An error occurred while registering the customer.'], 500);
+            } else {
+                return redirect()->back()->with('error', 'An error occurred while registering the customer.');
+            }
         }
     }
 
@@ -52,48 +63,81 @@ class CustomerController extends Controller
 
         $customer = Customer::where('email', $request->email)->first();
 
-        // Verify credentials
         if (!$customer || !Hash::check($request->password, $customer->password)) {
-            return response()->json(['message' => 'Incorrect email or password'], 401);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Incorrect email or password'], 401);
+            } else {
+                return redirect()->back()->withErrors(['email' => 'Incorrect email or password']);
+            }
         }
 
-        // Generate token using Laravel Sanctum
         $token = $customer->createToken('customerToken')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Customer logged in successfully',
-            'customer' => $customer,
-            'token' => $token,
-        ], 200);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Customer logged in successfully',
+                'customer' => $customer,
+                'token' => $token,
+            ], 200);
+        } else {
+            return view('Customers.dashboard', ['customer' => $customer]); // Correct view path
+        }
     }
 
     // Get customer count
-    public function getCustomerCount()
+    public function getCustomerCount(Request $request)
     {
         $count = Customer::count();
 
-        return response()->json(['count' => $count], 200);
+        if ($request->wantsJson()) {
+            return response()->json(['count' => $count], 200);
+        } else {
+            return view('Customers.count', ['count' => $count]); // Correct view path
+        }
     }
 
     // List all customers
-    public function index()
+    public function index(Request $request)
     {
         $customers = Customer::orderBy('created_at', 'DESC')->get();
 
-        return response()->json($customers, 200);
+        if ($request->wantsJson()) {
+            return response()->json($customers, 200);
+        } else {
+            return view('Customers.index', ['customers' => $customers]); // Correct view path
+        }
     }
 
     // Show a specific customer
-    public function show($id)
+    public function show(Request $request, $id)
     {
         try {
             $customer = Customer::findOrFail($id);
 
-            return response()->json($customer, 200);
+            if ($request->wantsJson()) {
+                return response()->json($customer, 200);
+            } else {
+                return view('Customers.show', ['customer' => $customer]); // Correct view path
+            }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Customer not found'], 404);
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Customer not found'], 404);
+            } else {
+                return redirect()->back()->with('error', 'Customer not found.');
+            }
         }
     }
+    public function edit($id)
+{
+    try {
+        $customer = Customer::findOrFail($id);
+
+        // Return the edit view with the customer's data
+        return view('Customers.edit', ['customer' => $customer]);
+    } catch (\Exception $e) {
+        return redirect()->route('customers.index')->with('error', 'Customer not found.');
+    }
+}
 
     // Store a new customer (Admin feature)
     public function store(Request $request)
@@ -101,7 +145,11 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), $this->rules());
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($request->wantsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
         }
 
         try {
@@ -114,10 +162,17 @@ class CustomerController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            return response()->json(['message' => 'Customer added successfully', 'customer' => $customer], 201);
-
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Customer added successfully', 'customer' => $customer], 201);
+            } else {
+                return redirect()->route('customers.index')->with('success', 'Customer added successfully');
+            }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred while adding the customer.'], 500);
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'An error occurred while adding the customer.'], 500);
+            } else {
+                return redirect()->back()->with('error', 'An error occurred while adding the customer.');
+            }
         }
     }
 
@@ -127,7 +182,11 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), $this->rules($id)); // Pass $id for unique validation
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($request->wantsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
         }
 
         try {
@@ -142,24 +201,38 @@ class CustomerController extends Controller
                 'password' => $request->password ? Hash::make($request->password) : $customer->password,
             ]);
 
-            return response()->json(['message' => 'Customer updated successfully', 'customer' => $customer], 200);
-
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Customer updated successfully', 'customer' => $customer], 200);
+            } else {
+                return redirect()->route('customers.show', $customer->id)->with('success', 'Customer updated successfully');
+            }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred while updating the customer.'], 500);
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'An error occurred while updating the customer.'], 500);
+            } else {
+                return redirect()->back()->with('error', 'An error occurred while updating the customer.');
+            }
         }
     }
 
     // Delete customer
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             $customer = Customer::findOrFail($id);
             $customer->delete();
 
-            return response()->json(['message' => 'Customer deleted successfully'], 200);
-
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Customer deleted successfully'], 200);
+            } else {
+                return redirect()->route('customers.index')->with('success', 'Customer deleted successfully');
+            }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred while deleting the customer.'], 500);
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'An error occurred while deleting the customer.'], 500);
+            } else {
+                return redirect()->back()->with('error', 'An error occurred while deleting the customer.');
+            }
         }
     }
 
@@ -176,9 +249,9 @@ class CustomerController extends Controller
         ];
     }
 
+    // Get the logged-in customer's details
     public function getLoggedInCustomer(Request $request)
-{
-    return response()->json($request->user()); // This will return the authenticated user's details
-}
-
+    {
+        return response()->json($request->user()); // This returns the authenticated user's details in JSON
+    }
 }
