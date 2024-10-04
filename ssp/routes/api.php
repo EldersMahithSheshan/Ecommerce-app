@@ -24,5 +24,18 @@ Route::prefix('products')->group(function () {
     Route::delete('/{id}', [ProductController::class, 'apiDestroy']);  // DELETE a product by ID
 });
 
+Route::get('/customers', [CustomerController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Protect customer-related routes
+
+    Route::get('/customers/{id}', [CustomerController::class, 'show']);
+    Route::put('/customers/{id}', [CustomerController::class, 'update']);
+    Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
+});
+
+Route::middleware('auth:sanctum')->get('/customer', [CustomerController::class, 'getLoggedInCustomer']);
+
+
 
 
