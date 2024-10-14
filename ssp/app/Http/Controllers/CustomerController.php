@@ -176,6 +176,12 @@ class CustomerController extends Controller
         }
     }
 
+    public function create()
+{
+    // Return the create view with the form
+    return view('Customers.create'); // Ensure the path is correct for your create view
+}
+
     // Update customer details
     public function update(Request $request, $id)
     {
