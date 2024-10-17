@@ -35,9 +35,14 @@ The system follows a relational database model, including entities such as Custo
 
 ## 📲 **Screenshots**
 
-![HOME PAGE](https://github.com/user-attachments/assets/f59c34fa-4f9a-4c20-8b9b-31b1fdb140a1)
-![Bus Shedule Checking](https://github.com/user-attachments/assets/c2071de8-a65e-45c6-aed7-0e0ecf1b0b73)
-![WELCOME](https://github.com/user-attachments/assets/91a56f9d-4144-4c60-895d-a0234ca52c97)
+![registratopn page](https://github.com/user-attachments/assets/98e08d0e-484c-4bfa-8855-42bca57792ff)
+![login page](https://github.com/user-attachments/assets/f9312a2e-0a59-4275-a244-bf70320e140d)
+![admin dashboard](https://github.com/user-attachments/assets/5f42237f-adf8-4671-8680-49db4bd2da70)
+![product dashboard](https://github.com/user-attachments/assets/f964d70b-828f-45e0-a50d-f53379225262)
+![customer dashboard](https://github.com/user-attachments/assets/47beeabd-d0e6-4343-ae8b-e230e2e878e3)
+![delete customer success](https://github.com/user-attachments/assets/7de3aefb-ea94-4c4a-98dd-2555646ed08d)
+![view customers](https://github.com/user-attachments/assets/c5bd5a6a-cbd0-4e28-b928-2f1b2c6db4de)
+![add customer](https://github.com/user-attachments/assets/ed75a39c-ada3-4542-a8cb-1f9e058b2204)
 
 
 
